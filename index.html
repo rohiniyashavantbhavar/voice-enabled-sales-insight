@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Insight Assistant</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #030303; /*#0d47a1*/
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+      color: #030303; /*#333*/
+    }
+    select,
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #030303; /*8#007bff*/
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #030303; /*#0056b3*/
+    }
+    #output {
+      margin-top: 25px;
+      padding: 15px;
+      background-color: #f1f3f5;
+      border-radius: 8px;
+      border: 1px solid #ced4da;
+      font-size: 16px;
+      color: #333;
+    }
+    #log {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #555;
+      max-height: 150px;
+      overflow-y: auto;
+      border-top: 1px dashed #ccc;
+      padding-top: 10px;
+    }
+    #chart-placeholder {
+      margin-top: 25px;
+      height: 250px;
+      background-color: #ffffff; /*#e3f2fd*/
+      border: 2px dashed #cacbcc; /*#90caf9*/
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #3b3b3b; /*#1565c0*/
+      font-weight: 500;
+    }
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 14px;
+      color: #777;
+    }
+    .voice-btn {
+      background-color: #030303; /*#00bfa58*/
+      margin-top: 5px;
+    }
+    .voice-btn:hover {
+      background-color: #030303; /*#008e76*/
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Voice Enabled Sales Insight Assistant</h1>
+    <label for="presetQueries">Choose a query:</label>
+    <select id="presetQueries" onchange="document.getElementById('query').value = this.value">
+      <option value="">-- Select a query --</option>
+      <option value="What are the top products?">What are the top products?</option>
+      <option value="What is the total sales?">What is the total sales?</option>
+      <option value="What is the average sales per product?">What is the average sales per product?</option>
+      <option value="Which product had the highest sales?">Which product had the highest sales?</option>
+      <option value="What was the best month for sales?">What was the best month for sales?</option>
+      <option value="Show revenue by product.">Show revenue by product.</option>
+      <option value="Show revenue by month.">Show revenue by month.</option>
+      <option value="Which product improved the most this month?">Which product improved the most this month?</option>
+    </select>
+    <form method="POST" onsubmit="submitForm(event)">
+      <input type="text" id="query" name="query" placeholder="Type or choose your query" required />
+      <button type="submit">Ask</button>
+      <button type="button" class="voice-btn" onclick="startVoice()">Ask with Voice</button>
+    </form>
+    <div id="output"></div>
+    <div id="chart-placeholder">📊 Chart Visualization Area (Future Scope)</div>
+    <div id="log">
+      <strong>Query Log:</strong>
+      <ul id="queryLogList"></ul>
+    </div>
+    <footer>© 2025 Voice Enabled Sales Insight | Final Year Project | NMITD</footer>
+  </div>
+  <script>
+    async function submitForm(event) {
+      event.preventDefault();
+      const query = document.getElementById("query").value;
+      const formData = new FormData();
+      formData.append("query", query);
+      const response = await fetch("/", { method: "POST", body: formData });
+      const data = await response.json();
+      document.getElementById("output").textContent = data.response;
+      speakText(data.response);
+
+      addToLog(query);
+    }
+    function addToLog(query) {
+      const li = document.createElement("li");
+      li.textContent = query;
+      document.getElementById("queryLogList").appendChild(li);
+    }
+    function startVoice() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.start();
+      recognition.onresult = function (event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById("query").value = transcript;
+      };
+      recognition.onerror = function (event) {
+        alert("Voice recognition error: " + event.error);
+      };
+    }
+  function speakText(text) {
+  const synth = window.speechSynthesis;
+  if (!synth) {
+    alert("Sorry, your browser does not support speech synthesis.");
+    return;
+  }
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  synth.speak(utterance);
+}
+  
+  </script>
+</body>
+</html>
